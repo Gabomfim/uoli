@@ -1,4 +1,3 @@
-.globl _start
 .globl set_torque
 .globl set_engine_torque
 .globl set_head_servo
@@ -8,8 +7,6 @@
 .globl get_time
 .globl set_time
 .globl puts
-
-_start:
 
     read_ultrasonic_sensor:
       j exit

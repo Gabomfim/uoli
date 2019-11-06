@@ -15,6 +15,7 @@ _start:
       j exit
     set_servo_angles:
       j exit
+    set_torque:
     set_engine_torque:
       li a7, 18 #call set_engine_torque
       ecall
@@ -26,6 +27,7 @@ _start:
     get_time:
       j exit
     set_time:
+      j exit
     write:
       j exit
 

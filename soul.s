@@ -40,6 +40,7 @@ int_handler:
     sw a5, 16(a0)
     sw a6, 20(a0)
     sw a7, 24(a0)
+<<<<<<< HEAD
     sw t0, 28(a0)
     sw t1, 32(a0)
     sw t2, 36(a0)
@@ -59,6 +60,8 @@ int_handler:
     sw s9, 92(a0)
     sw s10, 96(a0)
     sw s11, 100(a0)
+=======
+>>>>>>> robo andando
 
     #trata interrupções
     li t1, 16
@@ -87,16 +90,21 @@ int_handler:
       motor1:
       li t0, 0xFFFF001A
       sw a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
+<<<<<<< HEAD
+=======
+      j fim
+>>>>>>> robo andando
       motor2:
       li t0, 0xFFFF0018
       sw a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
-      mret
+      j fim
 
     gps:
     gyroscope:
     g_time:
     s_time:
     w:
+<<<<<<< HEAD
     
     salvador_de_registradores:.skip 124
 
@@ -130,4 +138,15 @@ int_handler:
     lw a1, 0(a0)
     csrrw a0, mscratch, a0 # troca valor de a0 com mscratch
     mret # retorna do tratador
+=======
+
+    
+
+    salvador_de_registradores: .skip 124
+
+    #restaura o contexto
+
+    fim:
+    mret
+>>>>>>> robo andando
 

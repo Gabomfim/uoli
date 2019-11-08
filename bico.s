@@ -21,11 +21,19 @@
       li a7, 17 #call set_servo_angles
       ecall
       j exit
+    set_servo_angles:
     set_torque:
+      li a7, 18 #call set_engine_torque
+      add a2, a1, 0 #coloca o valor do torque do motor 2 em a2
+      add a1, a1, 0 #coloca o valor do torque do motor 1 em a1
+      add a0, a0, 0 #coloca o valor 0 em a0 (id motor 1)
+      ecall
+      add a0, a0, 1 #coloca o valor 1 em a0 (id motor 2)
+      add a1, a2, 0 #coloca o valor do torque do motor 2 em a1
+      ecall
     set_engine_torque:
       li a7, 18 #call set_engine_torque
       ecall
-      j exit
     read_gps:
       li a7, 19 #call read_gps
       ecall

@@ -16,46 +16,42 @@
     read_ultrasonic_sensor:
       li a7, 16 #call read_ultrasonic_sensor
       ecall
-      j exit
+      ret
     set_servo_angles:
       li a7, 17 #call set_servo_angles
       ecall
-      j exit
-    set_servo_angles:
+      ret
     set_torque:
       li a7, 18 #call set_engine_torque
-      add a2, a1, 0 #coloca o valor do torque do motor 2 em a2
-      add a1, a1, 0 #coloca o valor do torque do motor 1 em a1
-      add a0, a0, 0 #coloca o valor 0 em a0 (id motor 1)
+      add t0, a1, 0 #coloca o valor do torque do motor 2 em t0
+      add a1, a0, 0 #coloca o valor do torque do motor 1 em a1
+      li a0, 0 #coloca o valor 0 em a0 (id motor 1)
       ecall
-      add a0, a0, 1 #coloca o valor 1 em a0 (id motor 2)
-      add a1, a2, 0 #coloca o valor do torque do motor 2 em a1
+      li a0, 1 #coloca o valor 1 em a0 (id motor 2)
+      add a1, t0, 0 #coloca o valor do torque do motor 2 em a1
       ecall
+      ret
     set_engine_torque:
       li a7, 18 #call set_engine_torque
       ecall
+      ret
     read_gps:
       li a7, 19 #call read_gps
       ecall
-      j exit
+      ret
     read_gyroscope:
       li a7, 20 #call read_gyroscope
       ecall
-      j exit
+      ret
     get_time:
       li a7, 21 #call get_time
       ecall
-      j exit
+      ret
     set_time:
       li a7, 22 #call set_time
       ecall
-      j exit
+      ret
     write:
       li a7, 64 #call write
       ecall
-      j exit
-
-exit:
-    li a0, 0 # exit code
-    li a7, 93 # syscall exit
-    ecall
+      ret

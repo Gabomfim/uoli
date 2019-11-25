@@ -34,6 +34,7 @@ user:
   
 int_handler:
     #salva o contexto
+    csrrw a0, mscratch, a0 # como faz pra preservar o a0?
     sw a1, 0(a0) # salva a1 
     sw a2, 4(a0) # salva a2 
     sw a3, 8(a0) # salva a3 
@@ -60,6 +61,7 @@ int_handler:
     sw s9, 92(a0)
     sw s10, 96(a0)
     sw s11, 100(a0)
+    csrrw a0, mscratch, a0
 
     #trata interrupções
     li t1, 16
@@ -112,6 +114,7 @@ int_handler:
 
     fim:
 
+    csrrw a0, mscratch, a0
     lw s11, 100(a0)
     lw s10, 96(a0)
     lw s9, 92(a0)
@@ -140,9 +143,9 @@ int_handler:
     lw a1, 0(a0)
     csrrw a0, mscratch, a0 # troca valor de a0 com mscratch
 
-    csrr t0, mepc  # carrega endereÃ§o de retorno (endereÃ§o da instruÃ§Ã£o que invocou a syscall)
+    csrrw t0, mepc, t0  # carrega endereÃ§o de retorno (endereÃ§o da instruÃ§Ã£o que invocou a syscall)
     addi t0, t0, 4 # soma 4 no endereÃ§o de retorno (para retornar apÃ³s a ecall) 
-    csrw mepc, t0  # armazena endereÃ§o de retorno de volta no mepc\
+    csrrw t0, mepc, t0  # armazena endereÃ§o de retorno de volta no mepc\
     #restaura registradores
     mret # retorna do tratador
 

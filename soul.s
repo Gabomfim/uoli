@@ -81,7 +81,26 @@ int_handler:
     li t1, 64
     beq a7, t1, w
     
-    ultrassonic:
+    ultrassonic: #16
+			leitor:
+			li t0, 0xFFFF0020
+			lw a0, zero #zero no endereço
+			lw a0, 0(t0) #coloca o valor do endereço de t0 no a0
+			li t1, 1
+			beq a0, t1, sensor_value
+			sensor_value:
+			li t0, 0xFFFF0024
+			lw a1, 0(t0) #coloca o valor do endereço de t0 no a1
+			li t1, -1
+			beq a1, t1, inexistente #caso não exista
+			lw a0, 0(t0) #coloca valor do sensor no a0
+			ret
+			inexistente:
+			li a0, -1
+			ret
+
+
+
     servo:
     engine: #18
       #teste de torque do motor 1

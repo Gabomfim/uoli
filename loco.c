@@ -4,11 +4,8 @@
 void debug();
 
 int main(int argc, char** argv){
-    set_torque(100, 100);
+    while(1){
+        
+    }
     return 0;
-}
-
-void debug(){
-    int i;
-    i=1;
 }

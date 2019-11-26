@@ -7,7 +7,7 @@
 .globl set_time
 .globl puts
 .globl read_ultrasonic_sensor
-.globl set_servo_angles
+.globl set_head_servo
 .globl read_gps
 .globl read_gyroscope
 # A gente usa todas essas de cima?
@@ -17,7 +17,19 @@
       ecall
       ret
 
-    set_servo_angles:
+    /* 
+    * Sets the angle of three Servo motors that control the robot head. 
+    *   Servo ID 0/1/2 identifies the Base/Mid/Top servos.
+    * Parameter: 
+    *   servo_id: Servo ID 
+    *   angle: Servo Angle 
+    * Returns:
+    *   -1 in case the servo id is invalid
+    *   -2 in case the servo angle is invalid
+    *    0 in case the servo id and the angle is valid
+    */
+    set_head_servo:
+      #eu assumi que os angulos e motores são válidos, precisa fazer esse check
       li a7, 17 #call set_servo_angles
       ecall
       ret
@@ -73,3 +85,4 @@
       li a7, 64 #call write
       ecall
       ret
+

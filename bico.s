@@ -17,10 +17,12 @@
       li a7, 16 #call read_ultrasonic_sensor
       ecall
       ret
+
     set_servo_angles:
       li a7, 17 #call set_servo_angles
       ecall
       ret
+
     set_torque:
       li a7, 18 #call set_engine_torque
       add t0, a1, 0 #coloca o valor do torque do motor 2 em t0
@@ -31,26 +33,32 @@
       add a1, t0, 0 #coloca o valor do torque do motor 2 em a1
       ecall
       ret
+
     set_engine_torque:
       li a7, 18 #call set_engine_torque
       ecall
       ret
+
     read_gps:
       li a7, 19 #call read_gps
       ecall
       ret
+
     read_gyroscope:
       li a7, 20 #call read_gyroscope
       ecall
       ret
+
     get_time:
       li a7, 21 #call get_time
       ecall
       ret
+
     set_time:
       li a7, 22 #call set_time
       ecall
       ret
+
     write:
       li a7, 64 #call write
       ecall

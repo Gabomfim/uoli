@@ -81,6 +81,7 @@ int_handler:
     li t1, 64
     beq a7, t1, w
     
+    # ==== Início ==== ainda não dá pra saber se isso aqui funciona ou não
     ultrassonic: #16
 			leitor:
 			li t0, 0xFFFF0020
@@ -96,8 +97,8 @@ int_handler:
 			ret
 			inexistente:
 			li a0, -1
-			ret
-
+			j fim
+    # ==== Fim ====
 
 
     servo:
@@ -120,7 +121,35 @@ int_handler:
     gyroscope:
     g_time:
     s_time:
-    w:
+
+
+    w: #64
+
+      li t0, 1 #contador
+      loop: # a1 tem endereço de memória a ser escrito e a2 tem número de bytes
+
+      ler_byte:
+        li t0, 0xFFFF0109
+        li a0, 1 # TIPO de entrada, 0=stdin   1=stdout
+        
+        la a1, ent # a1 contém o endereço onde vai ser salvo os bytes lidos
+        add a1, a1, t0 # soma t0 ao endereço ent
+        li a2, 1 # quantos bytes serão lidos
+        li a7, 63 # syscall read (63), guarda 1 byte na posição ent+t0
+        ecall
+
+      verifica_caracter_lido:
+        lb t1, 0(a1) # carrega o caracter lido em t1
+        li t2, 0(a2) # carrega tamanho da string
+        beq t0, t2, continua # sai do loop se leu um caracter com ascii 116
+        addi t0, t0, 1 # incrementa 1 na contadora
+        j loop
+      
+      continua:
+        sw a0, 0(t0) #carrega contador de bytes escritos no a0
+        j fim
+
+      ent: .skip 50
     
     salvador_de_registradores:.skip 124
 

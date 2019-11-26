@@ -85,15 +85,15 @@ int_handler:
     ultrassonic: #16
 			leitor:
 			li t0, 0xFFFF0020
-			lw a0, 0(t0) #coloca o valor do endereço de t0 no a0
+			lh a0, 0(t0) #coloca o valor do endereço de t0 no a0
 			li t1, 1
 			beq a0, t1, sensor_value
 			sensor_value:
 			li t0, 0xFFFF0024
-			lw a1, 0(t0) #coloca o valor do endereço de t0 no a1
+			lh a1, 0(t0) #coloca o valor do endereço de t0 no a1
 			li t1, -1
 			beq a1, t1, inexistente #caso não exista
-			lw a0, 0(t0) #coloca valor do sensor no a0
+			lh a0, 0(t0) #coloca valor do sensor no a0
 			ret
 			inexistente:
 			li a0, -1
@@ -124,32 +124,6 @@ int_handler:
 
 
     w: #64
-
-      li t0, 1 #contador
-      loop: # a1 tem endereço de memória a ser escrito e a2 tem número de bytes
-
-      ler_byte:
-        li t0, 0xFFFF0109
-        li a0, 1 # TIPO de entrada, 0=stdin   1=stdout
-        
-        la a1, ent # a1 contém o endereço onde vai ser salvo os bytes lidos
-        add a1, a1, t0 # soma t0 ao endereço ent
-        li a2, 1 # quantos bytes serão lidos
-        li a7, 63 # syscall read (63), guarda 1 byte na posição ent+t0
-        ecall
-
-      verifica_caracter_lido:
-        lb t1, 0(a1) # carrega o caracter lido em t1
-        li t2, 0(a2) # carrega tamanho da string
-        beq t0, t2, continua # sai do loop se leu um caracter com ascii 116
-        addi t0, t0, 1 # incrementa 1 na contadora
-        j loop
-      
-      continua:
-        sw a0, 0(t0) #carrega contador de bytes escritos no a0
-        j fim
-
-      ent: .skip 50
     
     salvador_de_registradores:.skip 124
 

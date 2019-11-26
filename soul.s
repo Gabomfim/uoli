@@ -17,51 +17,53 @@ csrw mie, t1
 # Ajusta o mscratch
 la t1, salvador_de_registradores # Coloca o endereço do buffer para salvar
 csrw mscratch, t1 # registradores em mscratch
-li sp, 134217724#seta o endereço da pilha
+li sp, 134217724 #seta o endereço da pilha
  
 # Muda para o Modo de usuário
 csrr t1, mstatus # Seta os bits 11 e 12 (MPP)
 li t2, ~0x1800 # do registrador mstatus
 and t1, t1, t2 # com o valor 00
 csrw mstatus, t1
+
+#Configurar o GPT para gerar interrupções após 100ms
+
+
 la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
 mret # PC <= MEPC; MIE <= MPIE; Muda modo para MPP
 
-reg_buffer:
 
-user:
-  
+# ==== Início do tratador de interrupção ====
+
 int_handler:
-    #salva o contexto
-    csrrw a0, mscratch, a0 # como faz pra preservar o a0?
-    sw a1, 0(a0) # salva a1 
-    sw a2, 4(a0) # salva a2 
-    sw a3, 8(a0) # salva a3 
-    sw a4, 12(a0) # salva a4
-    sw a5, 16(a0)
-    sw a6, 20(a0)
-    sw a7, 24(a0)
-    sw t0, 28(a0)
-    sw t1, 32(a0)
-    sw t2, 36(a0)
-    sw t3, 40(a0)
-    sw t4, 44(a0)
-    sw t5, 48(a0)
-    sw t6, 52(a0)
-    sw s0, 56(a0)
-    sw s1, 60(a0)
-    sw s2, 64(a0)
-    sw s3, 68(a0)
-    sw s4, 72(a0)
-    sw s5, 76(a0)
-    sw s6, 80(a0)
-    sw s7, 84(a0)
-    sw s8, 88(a0)
-    sw s9, 92(a0)
-    sw s10, 96(a0)
-    sw s11, 100(a0)
-    csrrw a0, mscratch, a0
+    #salva o contexto - nunca usar t6!!!!
+    csrrw t6, mscratch, t6 # como faz pra preservar o a0?
+    sw a1, 0(t6) # salva a1 
+    sw a2, 4(t6) # salva a2 
+    sw a3, 8(t6) # salva a3 
+    sw a4, 12(t6) # salva a4
+    sw a5, 16(t6)
+    sw a6, 20(t6)
+    sw a7, 24(t6)
+    sw t0, 28(t6)
+    sw t1, 32(t6)
+    sw t2, 36(t6)
+    sw t3, 40(t6)
+    sw t4, 44(t6)
+    sw t5, 48(t6)
+    sw a0, 52(t6) #a0 aqui
+    sw s0, 56(t6)
+    sw s1, 60(t6)
+    sw s2, 64(t6)
+    sw s3, 68(t6)
+    sw s4, 72(t6)
+    sw s5, 76(t6)
+    sw s6, 80(t6)
+    sw s7, 84(t6)
+    sw s8, 88(t6)
+    sw s9, 92(t6)
+    sw s10, 96(t6)
+    sw s11, 100(t6)
 
     #trata interrupções
     li t1, 16
@@ -81,7 +83,7 @@ int_handler:
     li t1, 64
     beq a7, t1, w
     
-    # ==== Início ==== ainda não dá pra saber se isso aqui funciona ou não
+    # ==== Início do ultrassonic ==== ainda não dá pra saber se isso aqui funciona ou não
     ultrassonic: #16
 			leitor:
 			li t0, 0xFFFF0020
@@ -104,10 +106,7 @@ int_handler:
     servo:
 
     engine: #18
-      #teste de torque do motor 1
-      li t0, 0
       beq a0, t0, motor1
-      li t0, 1
       beq a0, t0, motor2
       motor1:
       li t0, 0xFFFF001A
@@ -120,10 +119,15 @@ int_handler:
 
     gps:
     gyroscope:
-    g_time:
-    s_time:
 
-    # ==== Write: a1 - endereço de memória, a2 - número de bytes a serem escritos ====
+    # ==== Início do get_time: nenhum parâmetro e retorna o tempo do sistema em ms ====
+    g_time: #21
+
+
+    # ==== Início do set_time: a0 - tempo do sistema em ms ====
+    s_time: #22
+
+    # ==== Início do Write: a1 - endereço de memória, a2 - número de bytes a serem escritos ====
     w: #64
       mv t0, a2 #contador do vetor
       transmite:
@@ -145,6 +149,7 @@ int_handler:
       continua:
         mv a0, a2
         j fim
+    # ==== Fim do write ==== 
       
     
     salvador_de_registradores:.skip 5000
@@ -153,34 +158,33 @@ int_handler:
 
     fim:
 
-    csrrw a0, mscratch, a0
-    lw s11, 100(a0)
-    lw s10, 96(a0)
-    lw s9, 92(a0)
-    lw s8, 88(a0)
-    lw s7, 84(a0)
-    lw s6, 80(a0)
-    lw s5, 76(a0)
-    lw s4, 72(a0)
-    lw s3, 68(a0)
-    lw s2, 64(a0)
-    lw s1, 60(a0)
-    lw s0, 56(a0)
-    lw t6, 52(a0)
-    lw t5, 48(a0)
-    lw t4, 44(a0)
-    lw t3, 40(a0)
-    lw t2, 36(a0)
-    lw t1, 32(a0)
-    lw t0, 28(a0)
-    lw a7, 24(a0)
-    lw a6, 20(a0)
-    lw a5, 16(a0)
-    lw a4, 12(a0)
-    lw a3, 8(a0)
-    lw a2, 4(a0)
-    lw a1, 0(a0)
-    csrrw a0, mscratch, a0 # troca valor de a0 com mscratch
+    lw s11, 100(t6)
+    lw s10, 96(t6)
+    lw s9, 92(t6)
+    lw s8, 88(t6)
+    lw s7, 84(t6)
+    lw s6, 80(t6)
+    lw s5, 76(t6)
+    lw s4, 72(t6)
+    lw s3, 68(t6)
+    lw s2, 64(t6)
+    lw s1, 60(t6)
+    lw s0, 56(t6)
+    lw a0, 52(t6) #a0 aqui
+    lw t5, 48(t6)
+    lw t4, 44(t6)
+    lw t3, 40(t6)
+    lw t2, 36(t6)
+    lw t1, 32(t6)
+    lw t0, 28(t6) 
+    lw a7, 24(t6)
+    lw a6, 20(t6)
+    lw a5, 16(t6)
+    lw a4, 12(t6)
+    lw a3, 8(t6)
+    lw a2, 4(t6)
+    lw a1, 0(t6)
+    csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
 
     csrrw t0, mepc, t0  # carrega endereÃ§o de retorno (endereÃ§o da instruÃ§Ã£o que invocou a syscall)
     addi t0, t0, 4 # soma 4 no endereÃ§o de retorno (para retornar apÃ³s a ecall) 
@@ -188,3 +192,4 @@ int_handler:
     #restaura registradores
     mret # retorna do tratador
 
+# ==== Fim do tratador de interrupção ====

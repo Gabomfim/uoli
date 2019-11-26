@@ -24,6 +24,24 @@ csrr t1, mstatus # Seta os bits 11 e 12 (MPP)
 li t2, ~0x1800 # do registrador mstatus
 and t1, t1, t2 # com o valor 00
 csrw mstatus, t1
+
+#configura os servos pra posicao natural
+#(Base = 31, Mid = 80, Top = 78);
+li a0, 0 #base
+li a1, 31
+li a7, 17
+ecall
+
+li a0, 1 #mid
+li a1, 30
+li a7, 17
+ecall
+
+li a0, 2 #top
+li a1, 78
+li a7, 17
+ecall
+
 la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
 mret # PC <= MEPC; MIE <= MPIE; Muda modo para MPP

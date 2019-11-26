@@ -11,7 +11,6 @@
 .globl set_servo_angles
 .globl read_gps
 .globl read_gyroscope
-.globl write 
 
     read_ultrasonic_sensor:
       li a7, 16 #call read_ultrasonic_sensor
@@ -59,7 +58,19 @@
       ecall
       ret
 
-    write:
+# ==== Puts: tem que criar os três parâmetros do write ====
+    puts:
+      li t0, 0 #contador de número de char
+      li t1, 0x20 # /0 em ASCII
+      lb a1, 0(a0) #carrega primeiro caractere no a0
+      conta_char:
+        add t2, a0, t0
+        lw t3, 0(t2)
+        beq t3, t1, continua
+        addi t0, t0, 1
+        j conta_char
+      continua:
+        mv a2, t0 #número de bytes a ser transmitido      
       li a7, 64 #call write
       ecall
       ret

@@ -3,7 +3,6 @@
 #include "api_robot2.h"
 
 int main(int argc, char** argv){
-    set_torque(2, 2);
     puts("banana");
     return 0;
 }

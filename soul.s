@@ -102,6 +102,7 @@ int_handler:
 
 
     servo:
+
     engine: #18
       #teste de torque do motor 1
       li t0, 0
@@ -127,17 +128,26 @@ int_handler:
       mv t0, a2 #contador do vetor
       transmite:
         beq t0, x0, continua
-        li a1, 0xFFFF0109 #carrega o byte no endereço que o UART vai transmitir
+        li t3, 0xFFFF0109 #carrega o byte no endereço que o UART vai transmitir
+        lb t4, 0(a1)
+        sb t4, 0(t3)
         li t1, 1
-        sw t1, -1(a1) #enable UART
+        li t2, 0xFFFF0108
+        sb t1, 0(t2) #enable UART
+          busywaiting:
+            lb t5, 0(t2)
+            beq t5, zero, cont
+            j busywaiting
+      cont:    
         addi t0, t0, -1
-        lb a1, 1(a1)
+        addi a1, a1, 1
+        j transmite
       continua:
+        mv a0, a2
         j fim
-
       
     
-    salvador_de_registradores:.skip 124
+    salvador_de_registradores:.skip 5000
 
     #restaura o contexto
 

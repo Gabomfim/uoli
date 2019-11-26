@@ -61,12 +61,11 @@
 # ==== Puts: tem que criar os três parâmetros do write ====
     puts:
       li t0, 0 #contador de número de char
-      li t1, 0x20 # /0 em ASCII
-      lb a1, 0(a0) #carrega primeiro caractere no a0
+      mv a1, a0 #a1 é o endereço pro vetor de char
       conta_char:
         add t2, a0, t0
         lw t3, 0(t2)
-        beq t3, t1, continua
+        beq t3, zero, continua
         addi t0, t0, 1
         j conta_char
       continua:

@@ -111,11 +111,11 @@ int_handler:
       beq a0, t0, motor2
       motor1:
       li t0, 0xFFFF001A
-      sw a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
+      sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
       j fim
       motor2:
       li t0, 0xFFFF0018
-      sw a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
+      sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
       j fim
 
     gps:

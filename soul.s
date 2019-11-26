@@ -84,7 +84,6 @@ int_handler:
     ultrassonic: #16
 			leitor:
 			li t0, 0xFFFF0020
-			li a0, 0 #zero no endereço
 			lw a0, 0(t0) #coloca o valor do endereço de t0 no a0
 			li t1, 1
 			beq a0, t1, sensor_value

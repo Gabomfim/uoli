@@ -3,13 +3,13 @@
 #include "api_robot2.h"
 
 int main(int argc, char** argv){
-    set_torque(20,20);
-    set_torque(-20,-20);
-    debug();
+    while(1){
+        set_head_servo(0, 16); //base
+        set_head_servo(1, 52); //mid
+        set_head_servo(2, 0); //top
+        set_head_servo(0, 116); //base
+        set_head_servo(1, 90); //mid
+        set_head_servo(2, 156); //top
+    }
     return 0;
-}
-
-void debug(){
-    int i;
-    i = 1 + 2;
 }

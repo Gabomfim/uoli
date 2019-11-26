@@ -102,6 +102,26 @@ int_handler:
 
 
     servo:
+      li t0, 0
+      beq a0, t0, servo_base
+      li t0, 1
+      beq a0, t0, servo_mid
+      li t0, 2
+      beq a0, t0, servo_top
+      
+      servo_base:
+        li t0, 0xFFFF001E
+        sb a1, 0(t0)
+        j fim
+
+      servo_mid:
+        li t0, 0xFFFF001D
+        sb a1, 0(t0)
+        j fim
+      servo_top:
+        li t0, 0xFFFF001C
+        sb a1, 0(t0)
+        j fim
 
     engine: #18
       #teste de torque do motor 1
@@ -110,13 +130,13 @@ int_handler:
       li t0, 1
       beq a0, t0, motor2
       motor1:
-      li t0, 0xFFFF001A
-      sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
-      j fim
+        li t0, 0xFFFF001A
+        sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
+        j fim
       motor2:
-      li t0, 0xFFFF0018
-      sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
-      j fim
+        li t0, 0xFFFF0018
+        sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
+        j fim
 
     gps:
     gyroscope:

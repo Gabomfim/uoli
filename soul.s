@@ -26,6 +26,12 @@ and t1, t1, t2 # com o valor 00
 csrw mstatus, t1
 
 #Configurar o GPT para gerar interrupções após 100ms
+  li t1, 0xFFFF0100 #seta 100ms para memória
+  li t2, 100
+  sw t2, 0(t1)
+  li t1, 0xFFFF0104 #verifica o valor na memória para ver se foi tratado
+  li t2, 0
+  sb t2, 0(t1)
 
 #configura os servos pra posicao natural
 #(Base = 31, Mid = 80, Top = 78);
@@ -80,6 +86,31 @@ int_handler:
     sw s9, 92(t6)
     sw s10, 96(t6)
     sw s11, 100(t6)
+
+    verifica_gpt:
+      csrrw t1, mcause, t1 
+      li t2, 0
+      bgt t1, t2, maior #verifica se mcause é menor que -1, se mcause é positivo continua o tratamento 
+      
+      li t3, 0xFFFF0104 #verifica GPT-int 1 ou 0
+      lb t4, 0(t3)
+      beq t4, zero, fim #se 0xFFFF0104 for 0 e mcause<0 vai pro fim
+      li t2, 1
+      beq t4, t2, gpt_ajuda #se 0xFFFF0104 for 1 e mcause<0 muda pra 0 e continua
+
+    gpt_ajuda:
+      la t1, tempo #conta tempo do sistema 
+      lw t2, 0(t1)
+      addi t2, t2, 100
+      sw t2, 0(t1)
+      li t3, 0xFFFF0104 #zera o GPT-int
+      lb t4, 0(t3)      
+      sb zero, 0(t3) 
+      li t1, 100 #seta 100 no endereço
+      la t2, 0xFFFF0100
+      sw t1, 0(t2)
+      j fim    
+    maior:
 
     #trata interrupções
     li t1, 16
@@ -158,10 +189,17 @@ int_handler:
 
     # ==== Início do get_time: nenhum parâmetro e retorna o tempo do sistema em ms ====
     g_time: #21
+      la t0, tempo
+      lw a0, 0(t0)
+      sw a0, 52(t6) #a0 aqui
+      j fim
 
 
     # ==== Início do set_time: a0 - tempo do sistema em ms ====
     s_time: #22
+      la t1, tempo
+      sw a0, 0(t1)
+      j fim
 
     # ==== Início do Write: a1 - endereço de memória, a2 - número de bytes a serem escritos ====
     w: #64
@@ -184,6 +222,7 @@ int_handler:
         j transmite
       continua:
         mv a0, a2
+        sw a0, 52(t6) #a0 aqui
         j fim
     # ==== Fim do write ==== 
       
@@ -229,3 +268,7 @@ int_handler:
     mret # retorna do tratador
 
 # ==== Fim do tratador de interrupção ====
+
+
+
+tempo: .skip 4

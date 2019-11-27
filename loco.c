@@ -5,7 +5,7 @@ void debug();
 
 int main(int argc, char** argv){
     while(1){
-        
+        get_time();
     }
     return 0;
 }

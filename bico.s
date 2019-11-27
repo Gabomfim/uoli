@@ -2,33 +2,18 @@
 .globl set_engine_torque
 .globl set_head_servo
 .globl get_us_distance
-.globl get_gyro_angles
 .globl get_time
 .globl set_time
 .globl puts
-.globl set_head_servo
-.globl read_gps
+.globl get_current_GPS_position
 .globl read_gyroscope
-# A gente usa todas essas de cima?
 
     get_us_distance:
       li a7, 16 #call read_ultrasonic_sensor
       ecall
       ret
 
-    /* 
-    * Sets the angle of three Servo motors that control the robot head. 
-    *   Servo ID 0/1/2 identifies the Base/Mid/Top servos.
-    * Parameter: 
-    *   servo_id: Servo ID 
-    *   angle: Servo Angle 
-    * Returns:
-    *   -1 in case the servo id is invalid
-    *   -2 in case the servo angle is invalid
-    *    0 in case the servo id and the angle is valid
-    */
     set_head_servo:
-      #eu assumi que os angulos e motores são válidos, precisa fazer esse check
       li t0, 0
       beq a0, t0, set_head_servo_base
       li t0, 1
@@ -89,7 +74,7 @@
       ecall
       ret
 
-    read_gps:
+    get_current_GPS_position:
       li a7, 19 #call read_gps
       ecall
       ret
@@ -115,7 +100,7 @@
       mv a1, a0 #a1 é o endereço pro vetor de char
       conta_char: #conta número de caracteres da string
         add t2, a0, t0
-        lw t3, 0(t2)
+        lb t3, 0(t2)
         beq t3, zero, continua
         addi t0, t0, 1
         j conta_char

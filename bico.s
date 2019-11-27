@@ -2,7 +2,6 @@
 .globl set_engine_torque
 .globl set_head_servo
 .globl get_us_distance
-.globl get_current_GPS_position
 .globl get_gyro_angles
 .globl get_time
 .globl set_time
@@ -10,6 +9,7 @@
 .globl set_head_servo
 .globl read_gps
 .globl read_gyroscope
+# A gente usa todas essas de cima?
 
     get_us_distance:
       li a7, 16 #call read_ultrasonic_sensor
@@ -113,7 +113,7 @@
     puts:
       li t0, 0 #contador de número de char
       mv a1, a0 #a1 é o endereço pro vetor de char
-      conta_char:
+      conta_char: #conta número de caracteres da string
         add t2, a0, t0
         lw t3, 0(t2)
         beq t3, zero, continua

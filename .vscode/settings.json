@@ -1,3 +1,10 @@
 {
+<<<<<<< HEAD
+    "files.associations": {
+        "stdlib.h": "c",
+        "api_robot2.h": "c"
+    }
+=======
     "C_Cpp.errorSquiggles": "Disabled"
+>>>>>>> 3625684db5aff08f90b02ed45f1276bc05c32976
 }

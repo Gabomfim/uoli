@@ -17,13 +17,15 @@ csrw mie, t1
 # Ajusta o mscratch
 la t1, salvador_de_registradores # Coloca o endereço do buffer para salvar
 csrw mscratch, t1 # registradores em mscratch
-li sp, 134217724#seta o endereço da pilha
+li sp, 134217724 #seta o endereço da pilha
  
 # Muda para o Modo de usuário
 csrr t1, mstatus # Seta os bits 11 e 12 (MPP)
 li t2, ~0x1800 # do registrador mstatus
 and t1, t1, t2 # com o valor 00
 csrw mstatus, t1
+
+#Configurar o GPT para gerar interrupções após 100ms
 
 #configura os servos pra posicao natural
 #(Base = 31, Mid = 80, Top = 78);
@@ -46,12 +48,12 @@ la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
 mret # PC <= MEPC; MIE <= MPIE; Muda modo para MPP
 
-reg_buffer:
 
-user:
-  
+# ==== Início do tratador de interrupção ====
+
 int_handler:
     #salva o contexto
+    #salva o contexto - nunca usar t6!!!!
     csrrw t6, mscratch, t6 # como faz pra preservar o a0?
     sw a1, 0(t6) # salva a1 
     sw a2, 4(t6) # salva a2 
@@ -98,23 +100,21 @@ int_handler:
     li t1, 64
     beq a7, t1, w
     
-    # ==== Início ==== ainda não dá pra saber se isso aqui funciona ou não
+    # ==== Início do ultrassonic ==== ainda não dá pra saber se isso aqui funciona ou não
     ultrassonic: #16
-			leitor:
 			li t0, 0xFFFF0020
-			lw a0, 0(t0) #coloca o valor do endereço de t0 no a0
-			li t1, 1
-			beq a0, t1, sensor_value
-			sensor_value:
-			li t0, 0xFFFF0024
-			lw a1, 0(t0) #coloca o valor do endereço de t0 no a1
-			li t1, -1
-			beq a1, t1, inexistente #caso não exista
-			lw a0, 0(t0) #coloca valor do sensor no a0
-			ret
-			inexistente:
-			li a0, -1
-			j fim
+      li t1, 0
+			sw t1, 0(t0) #coloca o valor do endereço de t1 no t0
+      espera_sensor:
+        lw t1, 0(t0)
+        li t2, 1
+        beq t1, t2, continua_sensor
+        j espera_sensor
+      continua_sensor:
+      li t0, 0xFFFF0024
+      lw a0, 0(t0)
+      sw a0, 52(t6)
+      j fim
     # ==== Fim ====
 
 
@@ -146,10 +146,7 @@ int_handler:
       j fim
 
     engine: #18
-      #teste de torque do motor 1
-      li t0, 0
       beq a0, t0, motor1
-      li t0, 1
       beq a0, t0, motor2
       motor1:
         li t0, 0xFFFF001A
@@ -162,10 +159,15 @@ int_handler:
 
     gps:
     gyroscope:
-    g_time:
-    s_time:
 
-    # ==== Write: a1 - endereço de memória, a2 - número de bytes a serem escritos ====
+    # ==== Início do get_time: nenhum parâmetro e retorna o tempo do sistema em ms ====
+    g_time: #21
+
+
+    # ==== Início do set_time: a0 - tempo do sistema em ms ====
+    s_time: #22
+
+    # ==== Início do Write: a1 - endereço de memória, a2 - número de bytes a serem escritos ====
     w: #64
       mv t0, a2 #contador do vetor
       transmite:
@@ -187,6 +189,7 @@ int_handler:
       continua:
         mv a0, a2
         j fim
+    # ==== Fim do write ==== 
       
     
     salvador_de_registradores:.skip 5000
@@ -229,3 +232,4 @@ int_handler:
     #restaura registradores
     mret # retorna do tratador
 
+# ==== Fim do tratador de interrupção ====

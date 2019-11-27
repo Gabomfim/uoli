@@ -7,12 +7,11 @@
 .globl get_time
 .globl set_time
 .globl puts
-.globl read_ultrasonic_sensor
 .globl set_head_servo
 .globl read_gps
 .globl read_gyroscope
 
-    read_ultrasonic_sensor:
+    get_us_distance:
       li a7, 16 #call read_ultrasonic_sensor
       ecall
       ret
@@ -30,9 +29,49 @@
     */
     set_head_servo:
       #eu assumi que os angulos e motores são válidos, precisa fazer esse check
-      li a7, 17 #call set_servo_angles
-      ecall
-      ret
+      li t0, 0
+      beq a0, t0, set_head_servo_base
+      li t0, 1
+      beq a0, t0, set_head_servo_mid
+      li t0, 2
+      beq a0, t0, set_head_servo_top
+      j set_head_servo_invalido
+
+      #verifica erros no angulo
+      set_head_servo_base:
+        li t0, 16
+        li t1, 116
+        blt a1, t0, set_head_servo_angulo_invalido
+        blt t1, a1, set_head_servo_angulo_invalido
+        j set_head_servo_certo
+
+      set_head_servo_mid:
+        li t0, 52
+        li t1, 90
+        blt a1, t0, set_head_servo_angulo_invalido
+        blt t1, a1, set_head_servo_angulo_invalido
+        j set_head_servo_certo
+      
+      set_head_servo_top:
+        li t0, 0
+        li t1, 156
+        blt a1, t0, set_head_servo_angulo_invalido
+        blt t1, a1, set_head_servo_angulo_invalido
+        j set_head_servo_certo
+
+      set_head_servo_certo:
+        li a7, 17 #call set_servo_angles
+        ecall
+        li a0, 0
+        ret
+      
+      set_head_servo_invalido:
+        li a0, -1
+        ret
+
+      set_head_servo_angulo_invalido:
+        li a0, -2
+        ret
 
     set_torque:
       li a7, 18 #call set_engine_torque

@@ -220,6 +220,39 @@ int_handler:
 
 
     gyroscope:
+      li t0, 0xFFFF0004
+      sw zero, 0(t0)
+      espera_gyro:
+        lw t1, 0(t0)
+        li t2, 1
+        beq t1, t2, continua_gyro
+        j espera_gyro
+      continua_gyro:
+
+      li t0, 0xFFFF0014
+      lw t1, 0(t0)
+
+      #RESOLVENDO X
+      mv t2, t1
+      li t3, 0x3FF00000
+      and t2, t2, t3
+      srli t2, t2, 20
+      sw t2, 0(a0)
+
+      #RESOLVENDO Y
+      mv t2, t1
+      li t3, 0xFFC00
+      and t2, t2, t3
+      srli t2, t2, 8
+      sw t2, 4(a0)
+
+      #RESOLVENDO Z
+      mv t2, t1
+      li t3, 0x3FF
+      and t2, t2, t3
+      sw t2, 8(a0)
+      
+      j fim
 
     # ==== Início do get_time: nenhum parâmetro e retorna o tempo do sistema em ms ====
     g_time: #21

@@ -6,7 +6,7 @@
 .globl set_time
 .globl puts
 .globl get_current_GPS_position
-.globl read_gyroscope
+.globl get_gyro_angles
 
     get_us_distance:
       li a7, 16 #call read_ultrasonic_sensor
@@ -79,7 +79,7 @@
       ecall
       ret
 
-    read_gyroscope:
+    get_gyro_angles:
       li a7, 20 #call read_gyroscope
       ecall
       ret

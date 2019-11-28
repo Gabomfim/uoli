@@ -37,17 +37,17 @@ csrw mstatus, t1
 li a0, 0 #base
 li a1, 31
 li a7, 17
-#ecall
+ecall
 
 li a0, 1 #mid
 li a1, 30
 li a7, 17
-#ecall
+ecall
 
 li a0, 2 #top
 li a1, 78
 li a7, 17
-#ecall
+ecall
 
 la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
@@ -87,7 +87,7 @@ int_handler:
     sw s9, 92(t6)
     sw s10, 96(t6)
     sw s11, 100(t6)
-    csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
+    #csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
    
     # ==== Início da verificação de tratador de interrupção ==== 
     verifica_gpt:
@@ -95,8 +95,8 @@ int_handler:
       #li t2, 0
       #bgt t1, t2, maior #verifica se mcause é menor que -1, se mcause é positivo continua o tratamento 
       
-      csrr a1, mcause # lê a causa da exceção
-      bgez a1, maior # desvia se não for uma interrupção
+      csrr t4, mcause # lê a causa da exceção
+      bgez t4, maior # desvia se não for uma interrupção
       #andi a1, a1, 0x3f # isola a causa de interrupção
       #li a2, 11 # a2 = interrupção do timer
       #beq a1, a2, verifica_mem
@@ -185,20 +185,34 @@ int_handler:
       
       servo_fim:
       li a0, 0
+      sw a0, 52(t6)
       j fim
     # ==== Fim do set_head_servo ====
 
     # ==== Início do set_engine ====
     engine: #18
-      beq a0, t0, motor1
-      beq a0, t0, motor2
-      motor1:
-        li t0, 0xFFFF001A
-        sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
-        j fim
-      motor2:
-        li t0, 0xFFFF0018
-        sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
+        li t0, 0
+        beq a0, t0, motor1
+        li t0, 1
+        beq a0, t0, motor2
+        j invalid_engine
+      
+        motor1:
+          li t0, 0xFFFF001A
+          li a0, 0
+          sw a0, 52(t6)
+          sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 1
+          j fim
+        motor2:
+          li t0, 0xFFFF0018
+          li a0, 0
+          sw a0, 52(t6)
+          sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
+          j fim
+
+      invalid_engine:
+        li a0, -1
+        sw a0, 52(t6)
         j fim
     # ==== Fim do set_engine ====
 
@@ -321,7 +335,7 @@ int_handler:
 
     #restaura registradores
     restaura_rg:
-    csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
+    #csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
     lw s11, 100(t6)
     lw s10, 96(t6)
     lw s9, 92(t6)

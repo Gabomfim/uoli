@@ -59,20 +59,46 @@
         ret
 
     set_torque:
+      li t0, 101
+      li t1, -100
+      bge a0, t0, invalid_torque #verifica torque >= 101
+      blt a0, t1, invalid_torque #verifica torque < 100
+      bge a1, t0, invalid_torque #verifica torque >= 101
+      blt a1, t1, invalid_torque #verifica torque < 100
+
+      mv t0, a1 #armazena valor de a1 em t0
+
       li a7, 18 #call set_engine_torque
-      add t0, a1, 0 #coloca o valor do torque do motor 2 em t0
-      add a1, a0, 0 #coloca o valor do torque do motor 1 em a1
+      mv a1, a0 #coloca o valor do torque do motor 1 em a1
       li a0, 0 #coloca o valor 0 em a0 (id motor 1)
       ecall
+      bnez a0, invalid_engine #UNEXPECTED se acontecer é bug (set_torque vai retornar -2)
+
+      mv a1, t0 #pega o valor do torque do segundo motor novamente
       li a0, 1 #coloca o valor 1 em a0 (id motor 2)
-      add a1, t0, 0 #coloca o valor do torque do motor 2 em a1
       ecall
+      bnez a0, invalid_engine #UNEXPECTED se acontecer é bug (set_torque vai retornar -2)
+
       ret
 
     set_engine_torque:
+      li t0, 101
+      li t1, -100
+      bge a1, t0, invalid_torque #verifica torque >= 101
+      blt a1, t1, invalid_torque #verifica torque < 100
+
       li a7, 18 #call set_engine_torque
       ecall
+      bnez a0, invalid_engine #a0 diferente de 0 indica motor inválido
       ret
+
+      invalid_torque:
+        li a0, -1
+        ret
+
+      invalid_engine:
+        li a0, -2
+        ret
 
     get_current_GPS_position:
       li a7, 19 #call read_gps

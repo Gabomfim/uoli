@@ -26,26 +26,28 @@ and t1, t1, t2 # com o valor 00
 csrw mstatus, t1
 
 #Configurar o GPT para gerar interrupções após 100ms
-  #li t1, 0xFFFF0100 #seta 100ms para memória
-  #li t2, 100
-  #sw t2, 0(t1)
+  li t1, 0xFFFF0100 #seta 100ms para memória
+  li t2, 100
+  sw t2, 0(t1)
+  li t1, 0xFFFF0104
+  sw zero, 0(t1)
 
 #configura os servos pra posicao natural
 #(Base = 31, Mid = 80, Top = 78);
 li a0, 0 #base
 li a1, 31
 li a7, 17
-ecall
+#ecall
 
 li a0, 1 #mid
 li a1, 30
 li a7, 17
-ecall
+#ecall
 
 li a0, 2 #top
 li a1, 78
 li a7, 17
-ecall
+#ecall
 
 la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
@@ -55,36 +57,10 @@ mret # PC <= MEPC; MIE <= MPIE; Muda modo para MPP
 # ==== Início do tratador de interrupção ====
 
 int_handler:
-     # ==== Início da verificação de tratador de interrupção ==== 
-    verifica_gpt:
-      #csrrw t1, mcause, t1 
-      #li t2, 0
-      #bgt t1, t2, maior #verifica se mcause é menor que -1, se mcause é positivo continua o tratamento 
-      
-      #li t3, 0xFFFF0104 #verifica GPT-int 1 ou 0
-      #lb t4, 0(t3)
-      #beq t4, zero, fim #se 0xFFFF0104 for 0 e mcause<0 vai pro fim
-      #li t2, 1
-      #beq t4, t2, gpt_ajuda #se 0xFFFF0104 for 1 e mcause<0 muda pra 0 e continua
+     
 
-    gpt_ajuda:
-      #la t1, tempo #conta tempo do sistema 
-      #lw t2, 0(t1)
-      #addi t2, t2, 100
-      #sw t2, 0(t1)
-      #li t3, 0xFFFF0104 #zera o GPT-int
-      #lb t4, 0(t3)      
-      #sb zero, 0(t3) 
-      #li t1, 100 #seta 100 no endereço
-      #la t2, 0xFFFF0100
-      #sw t1, 0(t2)
-      #j fim    
-    maior:
-    # ==== Fim da verificação do GPT ====
-
-    #salva o contexto
     #salva o contexto - nunca usar t6!!!
-    csrrw t6, mscratch, t6 # como faz pra preservar o a0?
+    csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
     sw a1, 0(t6) # salva a1 
     sw a2, 4(t6) # salva a2 
     sw a3, 8(t6) # salva a3 
@@ -111,8 +87,42 @@ int_handler:
     sw s9, 92(t6)
     sw s10, 96(t6)
     sw s11, 100(t6)
-
+    csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
    
+    # ==== Início da verificação de tratador de interrupção ==== 
+    verifica_gpt:
+      #csrr t1, mcause
+      #li t2, 0
+      #bgt t1, t2, maior #verifica se mcause é menor que -1, se mcause é positivo continua o tratamento 
+      
+      csrr a1, mcause # lê a causa da exceção
+      bgez a1, maior # desvia se não for uma interrupção
+      #andi a1, a1, 0x3f # isola a causa de interrupção
+      #li a2, 11 # a2 = interrupção do timer
+      #beq a1, a2, verifica_mem
+      #j restaura_rg # desvia se não for interrupção
+    verifica_mem:
+      li t3, 0xFFFF0104 #verifica GPT-int 1 ou 0
+      lb t1, 0(t3) # 0 ou 1
+      beq t1, zero, restaura_rg #se 0xFFFF0104 for 0 e mcause<0 vai pro fim - gpt n precisa de ajuda
+      #li t2, 1
+      #beq t4, t2, gpt_ajuda #se 0xFFFF0104 for 1 e mcause<0 muda pra 0 e continua
+    gpt_ajuda:
+      la t1, tempo #conta tempo do sistema 
+      lw t2, 0(t1)
+      addi t2, t2, 100
+      sw t2, 0(t1)
+      li t3, 0xFFFF0104 #zera o GPT-int
+      #lb t4, 0(t3)      
+      sb zero, 0(t3) 
+      li t1, 100 #seta 100 no endereço
+      la t2, 0xFFFF0100
+      sw t1, 0(t2)
+      j restaura_rg    
+    maior:
+
+      
+    # ==== Fim da verificação do GPT ====
 
     #trata interrupções
     li t1, 16
@@ -149,7 +159,7 @@ int_handler:
       j fim
     # ==== Fim do ultrassonic ====
 
-
+    # ==== Início do set_head_servo ====
     servo:
       li t0, 0
       beq a0, t0, servo_base
@@ -176,7 +186,9 @@ int_handler:
       servo_fim:
       li a0, 0
       j fim
+    # ==== Fim do set_head_servo ====
 
+    # ==== Início do set_engine ====
     engine: #18
       beq a0, t0, motor1
       beq a0, t0, motor2
@@ -188,7 +200,7 @@ int_handler:
         li t0, 0xFFFF0018
         sh a1, 0(t0) #coloca o valor de a1(argumento) no torque do motor 2
         j fim
-
+    # ==== Fim do set_engine ====
 
     # ==== Início do get_current_GPS_position: recebe ponteiro pra Vector3 em a0 e retorna nada ====
     gps:
@@ -217,8 +229,9 @@ int_handler:
       sw t1, 8(a0)
 
       j fim
+    # ==== Fim do get_current_GPS_position ====
 
-
+    # ==== Início do Giroscópio ====
     gyroscope:
       li t0, 0xFFFF0004
       sw zero, 0(t0)
@@ -238,14 +251,12 @@ int_handler:
       and t2, t2, t3
       srli t2, t2, 20
       sw t2, 0(a0)
-
       #RESOLVENDO Y
       mv t2, t1
       li t3, 0xFFC00
       and t2, t2, t3
       srli t2, t2, 8
       sw t2, 4(a0)
-
       #RESOLVENDO Z
       mv t2, t1
       li t3, 0x3FF
@@ -253,6 +264,7 @@ int_handler:
       sw t2, 8(a0)
       
       j fim
+    # ==== Fim do Giroscópio ====
 
     # ==== Início do get_time: nenhum parâmetro e retorna o tempo do sistema em ms ====
     g_time: #21
@@ -302,6 +314,14 @@ int_handler:
 
     fim:
 
+    #endereÃ§o de retorno de volta no mepc\
+    csrr t0, mepc  # carrega endereÃ§o de retorno (endereÃ§o da instruÃ§Ã£o que invocou a syscall)
+    addi t0, t0, 4 # soma 4 no endereÃ§o de retorno (para retornar apÃ³s a ecall) 
+    csrw mepc, t0  # armazena 
+
+    #restaura registradores
+    restaura_rg:
+    csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
     lw s11, 100(t6)
     lw s10, 96(t6)
     lw s9, 92(t6)
@@ -330,10 +350,6 @@ int_handler:
     lw a1, 0(t6)
     csrrw t6, mscratch, t6 # troca valor de a0 com mscratch
 
-    csrrw t0, mepc, t0  # carrega endereÃ§o de retorno (endereÃ§o da instruÃ§Ã£o que invocou a syscall)
-    addi t0, t0, 4 # soma 4 no endereÃ§o de retorno (para retornar apÃ³s a ecall) 
-    csrrw t0, mepc, t0  # armazena endereÃ§o de retorno de volta no mepc\
-    #restaura registradores
     mret # retorna do tratador
 
 # ==== Fim do tratador de interrupção ====
@@ -341,3 +357,4 @@ int_handler:
 
 
 tempo: .word 0x00000000
+

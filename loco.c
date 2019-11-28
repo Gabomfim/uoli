@@ -2,15 +2,10 @@
 void debug();
 
 int main(int argc, char** argv){
-    Vector3 meuRobo;
-    int x;
-    int y;
-    int z;
-    while(1){
-        get_gyro_angles(&meuRobo);
-        x = meuRobo.x;
-        y = meuRobo.y;
-        z = meuRobo.z;
+    set_time(1234);
 
+    get_time();
+    while(1){
+        
     }
 }

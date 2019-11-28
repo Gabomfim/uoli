@@ -255,7 +255,7 @@ int_handler:
       mv t2, t1
       li t3, 0xFFC00
       and t2, t2, t3
-      srli t2, t2, 8
+      srli t2, t2, 10
       sw t2, 4(a0)
       #RESOLVENDO Z
       mv t2, t1
